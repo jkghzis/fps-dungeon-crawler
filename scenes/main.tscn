@@ -55,20 +55,19 @@ script = ExtResource("3_gkuli")
 
 [node name="standing_collision_shape3D" type="CollisionShape3D" parent="player"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-visible = false
 shape = SubResource("CapsuleShape3D_4rl6u")
 
 [node name="crouching_collision_shape3D" type="CollisionShape3D" parent="player"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
-visible = false
 shape = SubResource("CapsuleShape3D_fbuyo")
 disabled = true
 
-[node name="head" type="Node3D" parent="player"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
-visible = false
-
-[node name="Camera3D" type="Camera3D" parent="player/head"]
-
 [node name="RayCast3D" type="RayCast3D" parent="player"]
 target_position = Vector3(0, 2, 0)
+
+[node name="neck" type="Node3D" parent="player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+
+[node name="head" type="Node3D" parent="player/neck"]
+
+[node name="Camera3D" type="Camera3D" parent="player/neck/head"]

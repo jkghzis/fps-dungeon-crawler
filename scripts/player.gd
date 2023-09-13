@@ -1,7 +1,9 @@
 extends CharacterBody3D
 
+
 # Player nodes
-@onready var head = $head
+@onready var neck = $neck
+@onready var head = $neck/head
 @onready var standing_collision_shape_3d = $standing_collision_shape3D
 @onready var crouching_collision_shape_3d = $crouching_collision_shape3D
 @onready var ray_cast_3d = $RayCast3D
@@ -11,6 +13,14 @@ var current_speed = 5.0 # The players speed. Not a const, because we have sprint
 const walking_speed = 5.0 # Use @export var to tweak it during runtime inside the Godot inspector
 const sprinting_speed = 8.0
 const crouching_speed = 3.0
+
+# States
+var walking = false
+var sprinting = false
+var crouching = false
+var free_looking = false
+var sliding = false
+
 
 # Movement Vars
 var crouching_depth = -0.5
@@ -37,7 +47,11 @@ func _input(event):
 
 	# Mouse movement logics
 	if event is InputEventMouseMotion:
-		rotate_y(deg_to_rad(-event.relative.x * mouse_sens))
+		if free_looking == true:
+			neck.rotate_y(deg_to_rad(-event.relative.x * mouse_sens))
+			neck.rotation.y = clamp(neck.rotation.y, deg_to_rad(-89), deg_to_rad(89))
+		else:
+			rotate_y(deg_to_rad(-event.relative.x * mouse_sens))
 		head.rotate_x(deg_to_rad(-event.relative.y * mouse_sens))
 		head.rotation.x = clamp(head.rotation.x, deg_to_rad(-89), deg_to_rad(89))
 
@@ -49,25 +63,47 @@ func _physics_process(delta):
 	# Crouching
 	if Input.is_action_pressed("crouch"):
 		current_speed = crouching_speed
-		head.position.y = lerp(head.position.y, 1.8+crouching_depth, delta * lerp_speed) # Put the players head in a crouch position
+		head.position.y = lerp(head.position.y, crouching_depth, delta * lerp_speed) # Put the players head in a crouch position
 
 		standing_collision_shape_3d.disabled = true
 		crouching_collision_shape_3d.disabled = false
 	
+		walking = false
+		sprinting = false
+		crouching = true
+
+
 	elif !ray_cast_3d.is_colliding(): # Check if player can stand (doesnt't collide with mesh)
 		# Standing 
 		standing_collision_shape_3d.disabled = false
 		crouching_collision_shape_3d.disabled = true
 		
 		# Change the speed according to weather we are sprinting or not
-		head.position.y = lerp(head.position.y, 1.8, delta * lerp_speed) # Put the players head in a standing position
+		head.position.y = lerp(head.position.y, 0.0, delta * lerp_speed) # Put the players head in a standing position
 	
 		if Input.is_action_pressed("sprint"):
 			# Sprinting
 			current_speed = sprinting_speed
+
+			walking = false
+			sprinting = true
+			crouching = false
 		else:
 			# Walking
 			current_speed = walking_speed
+
+			walking = true
+			sprinting = false
+			crouching = false
+
+
+	# Handle free looking
+	if Input.is_action_pressed("free_look"):
+		free_looking = true
+	else:
+		free_looking = false
+		neck.rotation.y = lerp(neck.rotation.y, 0.0, delta * lerp_speed)
+		
 
 	# Add the gravity.
 	if not is_on_floor():
