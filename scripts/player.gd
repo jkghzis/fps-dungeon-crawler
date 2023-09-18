@@ -1,12 +1,15 @@
 extends CharacterBody3D
 
 
+
 # Player nodes
 @onready var neck = $neck
 @onready var head = $neck/head
 @onready var standing_collision_shape_3d = $standing_collision_shape3D
 @onready var crouching_collision_shape_3d = $crouching_collision_shape3D
 @onready var ray_cast_3d = $RayCast3D
+@onready var camera_3d = $neck/head/Camera3D
+
 
 # Speed vars
 var current_speed = 5.0 # The players speed. Not a const, because we have sprinting and this will change the speed.
@@ -29,6 +32,8 @@ const jump_velocity = 4.5
 
 var lerp_speed = 10.0 # Makes the movement feel alot more gradual.
 
+var free_look_tilt_amount = 8
+
 # Input vars
 var direction = Vector3.ZERO
 const mouse_sens = 0.25 
@@ -49,7 +54,7 @@ func _input(event):
 	if event is InputEventMouseMotion:
 		if free_looking == true:
 			neck.rotate_y(deg_to_rad(-event.relative.x * mouse_sens))
-			neck.rotation.y = clamp(neck.rotation.y, deg_to_rad(-89), deg_to_rad(89))
+			neck.rotation.y = clamp(neck.rotation.y, deg_to_rad(-120), deg_to_rad(120))
 		else:
 			rotate_y(deg_to_rad(-event.relative.x * mouse_sens))
 		head.rotate_x(deg_to_rad(-event.relative.y * mouse_sens))
@@ -100,10 +105,12 @@ func _physics_process(delta):
 	# Handle free looking
 	if Input.is_action_pressed("free_look"):
 		free_looking = true
+		camera_3d.rotation.z = -deg_to_rad(neck.rotation.y * free_look_tilt_amount)
+		#camera_3d.rotation.z =  lerp(camera_3d.rotation.z, +deg_to_rad(neck.rotation.y + free_look_tilt_amount), delta * lerp_speed)
 	else:
 		free_looking = false
 		neck.rotation.y = lerp(neck.rotation.y, 0.0, delta * lerp_speed)
-		
+		camera_3d.rotation.z = lerp(camera_3d.rotation.z, 0.0, delta * lerp_speed)
 
 	# Add the gravity.
 	if not is_on_floor():
