@@ -32,6 +32,18 @@ var slide_vector = Vector2.ZERO
 var slide_speed = 10.0
 
 
+# Head bobbings vars
+const head_bobbing_sprinting_speed = 22.0
+const head_bobbing_walking_speed = 14.0
+const head_bobbing_crouching_speed = 10.0
+
+const head_bobbing_sprinting_intensity = 0.2
+const head_bobbing_walking_intensity = 0.1
+const head_bobbing_crouching_intensity = 0.05
+
+var head_bobbing_vector = Vector2.ZERO
+var head_bobbing_index = 0.0
+
 # Movement Vars
 var crouching_depth = -0.5
 const jump_velocity = 4.5
